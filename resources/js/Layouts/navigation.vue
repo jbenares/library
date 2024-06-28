@@ -4,12 +4,7 @@
     import { useRouter } from "vue-router";
     const router = useRouter()
     
-    const logout = () => {
-      if(confirm("Are you sure you want to logout?")){
-        localStorage.removeItem('token')
-        router.push('/')
-      }
-    }
+   
     </script>
     <template>
     
@@ -21,18 +16,7 @@
         </div>
         <div class="navbar-menu-wrapper d-flex align-items-stretch">
          
-         
-          <ul class="navbar-nav navbar-nav-right">
-          
-           
-           
-            <li class="nav-item nav-logout d-none d-lg-block">
-              <button class="nav-link"  @click="logout">
-                <i class="mdi mdi-power"></i>
-              </button>
-            </li>
-          
-          </ul>
+       
           <button class="navbar-toggler navbar-toggler-right d-lg-none align-self-center" type="button" data-toggle="offcanvas">
             <span class="mdi mdi-menu"></span>
           </button>

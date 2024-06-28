@@ -33,11 +33,11 @@ return [
         'local' => [
             'driver' => 'local',
             'root' => storage_path(),
-            'throw' => false,
+            
         ],
         'uploads' => [
             'driver' => 'local',
-            'root'   => public_path() . '/files',
+            'root'   => public_path() . '/books',
         ],
 
         'public' => [

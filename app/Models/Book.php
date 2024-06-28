@@ -5,11 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class DocumentType extends Model
+class Book extends Model
 {
     use HasFactory;
-    protected $table = 'document_type'; 
+    protected $table = 'book_details'; 
     protected $fillable = [
-        'type_name',
+        'book_name',
+        'author',
+        'book_cover'
     ];
+
 }
