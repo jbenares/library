@@ -1,0 +1,8 @@
+<template>
+     <footer class="footer">
+            <div class="d-sm-flex justify-content-center justify-content-sm-between">
+              <span class="text-muted text-center text-sm-left d-block d-sm-inline-block">Copyright © 2024 <a href="https://benar.es/jonah" target="_blank">Jonah Benares</a>. All rights reserved.</span>
+              
+            </div>
+          </footer>
+</template>
