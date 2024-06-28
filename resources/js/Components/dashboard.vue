@@ -1,9 +1,13 @@
+
 <script setup>
 	import navigation from '../Layouts/navigation.vue';
   import sidebar from '../Layouts/sidebar.vue';
   import footer_view from '../Layouts/footer.vue';
 	//import footerPage from '@/Components/footer.vue';
    	import {  EyeIcon} from '@heroicons/vue/24/solid';
+     import DataTable from 'datatables.net-vue3';
+    import DataTablesCore from 'datatables.net';
+    DataTable.use(DataTablesCore);
 	import {onMounted, ref} from "vue";
   import { useRouter } from "vue-router" 
    
@@ -11,21 +15,67 @@
     let books = ref([])
     let searchBooks=ref([]);
     let form = ref('')
+    let currentSort = 'book_name'
+    let currentSortDir = 'asc'
+    
 
     onMounted(async () => {
       getBooks()
     })
 
+    const options = {
+		 dom: 'Bftip',
+		dom: "<'row'<'col-sm-8 col-lg-8 mb-2 pr-0 flex justify-end'B ><'col-sm-4 col-lg-4 mb-2 pl-1'f>>"+"<'row'<'col-sm-12 mb-2'tr>>"+"<'row'<'col-sm-6 mb-2'i><'col-sm-6 mb-2'p>>",
+		select: true,	
+		lengthMenu: [
+			[10, 25, 50, -1],
+			['10 rows', '25 rows', '50 rows', 'Show all']
+		],
+		buttons: [
+			{
+				title:'Items',
+				extend: 'copy',
+				exportOptions: {
+					columns: [ 0, 1, 2, 3],
+					orthogonal: null
+				}
+			},
+			{
+				title:'Items',
+				extend: 'excel',
+				exportOptions: {
+					columns: [ 0, 1, 2, 3], 
+					orthogonal: null
+				},
+				createEmptyCells: true,
+                customize: function(xlsx) {
+                    var sheet = xlsx.xl.worksheets['sheet1.xml'];
+                    var clRow = $('row', sheet);
+                    clRow[0].children[0].remove(); // clear header cell
+                    $( 'row c', sheet ).attr( 's', '25' );
+                }
+			},
+			{
+				title:'Items',
+				extend: 'print',
+				exportOptions: {
+					columns: [ 0, 1, 2, 3],
+					orthogonal: null
+				}
+			},
+			{
+				extend: 'pageLength'
+			}
+		]
+		//buttons: ['copy','excel','csv','pageLength']
+	};
+   
     const getBooks = async (page = 1) => {
 
         const response = await axios.get(`/api/get_all_books?page=${page}&filter=${searchBooks.value}`);
         books.value = response.data
     }
 
-    const search = async () => {
-          let response = await fetch('/api/search_books?filter='+searchBooks.value);
-          books.value = await response.json();
-    }
 
     const onEdit = (id) => {
       router.push('/update_book/'+id)
@@ -91,53 +141,37 @@
                       <div >
                             <a href="/add_book" class="btn btn-gradient-primary btn-fw">Add New Book</a>
                             </div>
-                        <div class="d-flex justify-between pb-2 mb-2" style=" float:right !important;" >
-                            <div class=" justify-right  w-80" >
-                                <div class="input-group border" >
-                                    <div class="input-group-prepend" >
-                                        <div class="input-group-icon py-3 px-2">
-                                            <i class="fa fa-search "></i>
-                                        </div>
-                                    </div>
-                                    <input type="text" class="form-control border-0 pl-0" id="search" placeholder="Type to search..." @keyup="search()" v-model="searchBooks" >
-                                </div>
-                            </div>
-                        </div>
-                      <table class="table">
-                        <thead>
-                          <tr>
-                            <th> # </th>
-                            <th> Book Name </th>
+                      
+                        <!-- <div class="col-lg-12 px-1">
+                              <div class="flex justify-end mb-3">
+                                  <a :href="'/export_books'" class="btn btn-sm btn-success">
+                                      <div class="flex justify-between space-x-2" >
+                                          <span>Export to Excel</span>
+                                      </div>
+                                  </a>
+                              </div>
+                          </div> -->
+                        <DataTable :data="books" :options="options" class="display" width="100%">  
+                      <thead>
+                        <tr>
+                            <th>Book Name </th>
                             <th> Author </th>
-                            <th> Book Cover </th>
-                            <th>Action </th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          <tr v-for="(b,x) in books.data">
-                            <td>{{ x+1 }}</td>
-                            <td>{{ b.book_name }}</td>
-                            <td>{{ b.author }}</td>
-                            <td>
-                              <img :src="`/books/`+b.book_cover"></img>
-                            </td>
-                            <td>
-                              <a  @click="openModel(b.id)" title="View Book"><i class="fa fa-eye icon-sm text-info text-center"  ></i></a>
-                              <a @click="onEdit(b.id)" title="Update Book"><i class="fa fa-pencil icon-sm text-info text-center m-2"  ></i></a>
-                              <a @click="onDelete(b.id)" title="Delete Book"><i class="fa fa-trash icon-sm text-info text-center"  ></i></a>
-                              </td>
-                          </tr>
-                        </tbody>
-                      </table>
-                      <div class="d-flex justify-end p-2 border-t">
-                        <nav aria-label="Page navigation">
-                            <TailwindPagination
-                                :data="books"
-                                :limit="1"
-                                @pagination-change-page="getBooks"
-                            />
-                        </nav>
-                    </div>
+                        </tr>
+                      </thead>
+                   
+                      <template #column-2="props">
+                        <a  @click="openModel(props.rowData.id)" title="View Book"><i class="fa fa-eye icon-sm text-info text-center"  ></i></a>
+                    
+                      </template>
+                      <template #column-3="props">
+                        <a @click="onEdit(props.rowData.id)" title="Update Book"><i class="fa fa-pencil icon-sm text-info text-center m-2"  ></i></a>
+                      </template>
+                      <template #column-4="props">
+                        <a @click="onDelete(props.rowData.id)" title="Delete Book"><i class="fa fa-trash icon-sm text-info text-center"  ></i></a>
+                      </template>
+                    </DataTable>
+                      
+                     
                     </div>
                   </div>
                 </div>

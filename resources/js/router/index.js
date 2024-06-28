@@ -25,6 +25,8 @@ const routes = [
         props:true
       
     },
+
+
    
     {
         path:'/:pathMatch(.*)*',

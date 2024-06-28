@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use App\Models\Book;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
+use App\Exports\BookExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class BookController extends Controller
 {
@@ -30,17 +32,17 @@ class BookController extends Controller
 
     public function show(Request $request){
 
-        $filter=$request->get('filter');
-       
-        if($filter!=null){
-            $books=Book::where('book_name','LIKE',"%$filter%")
-                            ->orWhere('author','LIKE', "%$filter%")
-                            ->orderBy('book_name','ASC')->paginate(10);
-            return response()->json($books);
-        }else{
-            $books = Book::orderBy('book_name','ASC')->paginate(10);
-            return response()->json($books);
+        $books = Book::orderBy('book_name','ASC')->get();
+
+        foreach($books AS $b){
+            $booksArray[] = [
+                'id'=>$b->id,
+                $b->book_name,
+                $b->author,
+            ];
         }
+
+        return response()->json($booksArray);
     }
 
     public function search(Request $request){
@@ -111,5 +113,10 @@ class BookController extends Controller
         unlink($fileToDelete);
 
     }
+
+    public function export_books(){
+        return Excel::download(new BookExport(), 'BookList.xlsx');
+    }
+
 
 }
